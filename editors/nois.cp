@@ -202,8 +202,11 @@ int32 playsound(void *box) {
 
 void loaddata(unsigned char *data,size_t length,BView *bkgview) { //runs when editor launched, window rect is 300 x 300 pixels
 	BNBox *box = new BNBox(bkgview);
-	box->data = new unsigned char[length];
-	memcpy(box->data,data,length);
+	if (length != 0) {
+		box->data = new unsigned char[length];
+		memcpy(box->data,data,length);
+	} else
+		box->data = NULL;
 	box->length = length;
 	box->SetViewColor(240,240,240);
 	bkgview->Window()->ResizeTo(300,100);
@@ -211,6 +214,10 @@ void loaddata(unsigned char *data,size_t length,BView *bkgview) { //runs when ed
 
 unsigned char* savedata(size_t *length,BView *bkgview) { //runs when window closes, return value is what should be written to the resource, window is window address given in loaddata()
 	BNBox *box = (BNBox *)(bkgview->ChildAt(0));
+	if (box->data == NULL) {
+		*length = 0;
+		return new unsigned char(0);
+	}
 	if (find_thread("playsound") >= B_OK)
 		kill_thread(find_thread("playsound"));
 	unsigned char *data = new unsigned char[box->length + sizeof(TranslatorSound)];
