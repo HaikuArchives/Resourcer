@@ -114,9 +114,9 @@ class DoubleItem : public BListItem {
 		}
 		void Invoke(bool generic = false);
 		~DoubleItem(void) {
-			delete name;
+			delete [] name;
 			if (idstring != NULL)
-				delete idstring;
+				delete [] idstring;
 		}
 		BOutlineListView *parent;
 		int32 id;

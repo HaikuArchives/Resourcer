@@ -197,7 +197,7 @@ bool restypeview::InitiateDrag(BPoint point,int32 index, bool selected) {
 	todrag->AddData("type",B_UINT32_TYPE,&code,4);
 	if (code == 'CSTR')
 		todrag->AddData(m_type,'MIME',data,ssize_t(size));
-	delete data;
+	delete  [] data;
 	todrag->AddString("name",y->name);
 	todrag->AddPointer("this",this);
 	if (y->idstring == NULL)
@@ -293,7 +293,7 @@ void restypeview::MessageReceived(BMessage *msg) {
 					((reswindow *)(Window()))->file->ReadAttr(name,type,0,data,size);
 				}
 				file.Write(data,size);
-				delete data;
+				delete [] data;
 				BNodeInfo ni(&file);
 				/*if (type == 'bits')
 					ni.SetType("image/x-portable-pixmap");
@@ -459,7 +459,7 @@ void restypeview::MessageReceived(BMessage *msg) {
 	}
 	for(;x->openres->HasResource(type,id);id++) {}
 	AddResource(type,id,name,size_t(size),data,false,false);
-	delete data;
+	delete [] data;
 	return;
 }
 
@@ -526,7 +526,7 @@ int32 copy(void *y) {
 	be_clipboard->Data()->AddData(name,type,data,size,isattr);
 	be_clipboard->Commit();
 	be_clipboard->Unlock();
-	delete data;
+	delete [] data;
 	return 0;
 }
 	
@@ -593,7 +593,7 @@ int32 getdata(void *y) {
 		for(id = 0;x->openres->HasResource(type,id);id++) {}
 		x->res->AddResource(type,id,name,size_t(size),data,false,false);
 		if (construct)
-			delete data;
+			delete [] data;
 		return 0;
 	}
 	
@@ -649,13 +649,13 @@ int32 copytoattr(void *y) {
 				}
 			}
 			x->res->AddResource(type,0,name,size,data,true,false);
-			delete name;
-			delete data;
+			delete [] name;
+			delete [] data;
 		} else {
 			unsigned char *data;
 			char *name = new char[strlen(cura->name) + 1];
 			if (cura->name[0] == 0) {
-				delete name;
+				delete [] name;
 				name = NULL;
 			} else {
 				strcpy(name,cura->name);
@@ -881,6 +881,11 @@ class optwindow : public BWindow {
 				typea = flipcode(typea);
 				char *namea = new char[strlen(name->Text()) + 1];
 				strcpy(namea,name->Text());
+				if (namea[0] == 0) {
+					delete [] namea;
+					namea = new char[8];
+					strcpy(namea,"Unnamed");
+				}
 				if (willberes) {
 					if (win->openres->HasResource(typea,test) == true) {
 						BAlert *alert = new BAlert("alert","This resource already exists. Would you like to overwrite the existing one?","Cancel","OK",NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT);
@@ -904,7 +909,7 @@ class optwindow : public BWindow {
 				win->res->Select(win->res->IndexOf(item));
 				win->Unlock();
 				Unlock();
-				delete namea;
+				delete [] namea;
 				PostMessage(B_QUIT_REQUESTED);
 				//name->SetText(NULL);
 			}
@@ -1090,7 +1095,7 @@ class pluginwindow : public BWindow {
 				alert->Go();
 				RemoveChildren();
 				unload_add_on(plugin.plugin);
-				delete plugin.olddata;
+				delete [] plugin.olddata;
 				return true;
 			}
 			if (give == plugin.oldlength) {
@@ -1108,8 +1113,8 @@ class pluginwindow : public BWindow {
 					alert->Go();
 					RemoveChildren();
 					unload_add_on(plugin.plugin);
-					delete data;
-					delete plugin.olddata;
+					delete [] data;
+					delete [] plugin.olddata;
 					return true;
 				}
 			} else {
@@ -1118,8 +1123,8 @@ class pluginwindow : public BWindow {
 					alert->Go();
 					RemoveChildren();
 					unload_add_on(plugin.plugin);
-					delete data;
-					delete plugin.olddata;
+					delete [] data;
+					delete [] plugin.olddata;
 					return true;
 				}
 			}
@@ -1127,9 +1132,9 @@ class pluginwindow : public BWindow {
 				plugin.win->changes = true;
 			RemoveChildren();
 			unload_add_on(plugin.plugin);
-			delete data;
-			delete plugin.olddata;
-			delete yname;
+			delete [] data;
+			delete [] plugin.olddata;
+			delete [] yname;
 			return true;
 			}
 		void MessageReceived(BMessage *message) {

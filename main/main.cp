@@ -12,7 +12,6 @@ int main(void) {
 	openpanel = NULL;
 	itemLista = NULL;
 	new BRApplication;
-	openpan = false;		//---No open open or save file panels----
 	newpanel = new BFilePanel(B_SAVE_PANEL,NULL,NULL,B_FILE_NODE,false,NULL,NULL,false,true);
 	openpanel = new BFilePanel(B_OPEN_PANEL,NULL,NULL,B_FILE_NODE,false,NULL,new appFilter,false,true);
 	be_app->Run();
@@ -121,7 +120,6 @@ void BRApplication::RefsReceived(BMessage *message) {
 		new reswindow(title,ref); //---reswindow does all the dirty work
 		openpan = false;          //---All these booleans could probably be consolidated
 		saveas = false;
-		alredopen = true;
 	}
 	
 void BRApplication::dissectwindow(BMessage *msg) { //---Do panel close
@@ -165,7 +163,7 @@ void BRApplication::getready(BMessage *message,bool istempfile) { //---Do save a
 				buffer = new unsigned char[info.size];
 				x->file->ReadAttr(name,info.type,0,buffer,info.size);
 				entry.WriteAttr(name,info.type,0,buffer,info.size);
-				delete buffer;
+				delete [] buffer;
 			}
 			if (x->istempfile) {
 				BEntry entry(&(x->fileref));
@@ -186,6 +184,5 @@ void BRApplication::getready(BMessage *message,bool istempfile) { //---Do save a
 			reswindow *tempder = new reswindow(title,dira);
 			tempder->istempfile = istempfile;
 		}
-		alredopen = true;
 		saveas = false;
 	}
