@@ -313,7 +313,7 @@ class restypeview : public BOutlineListView {
 		void MessageReceived(BMessage *msg);
 		bool InitiateDrag(BPoint point,int32 index, bool selected);
 		void KeyDown(const char *bytes, int32 numBytes);
-		void DeleteSelection(void);
+		void DeleteSelection(DoubleItem *item = NULL);
 		BStringItem *resources;
 		BStringItem *attributes;
 };

@@ -881,7 +881,7 @@ class optwindow : public BWindow {
 				typea = flipcode(typea);
 				char *namea = new char[strlen(name->Text()) + 1];
 				strcpy(namea,name->Text());
-				if (namea[0] == 0) {
+				if ((namea[0] == 0) && (!willberes)) {
 					delete [] namea;
 					namea = new char[8];
 					strcpy(namea,"Unnamed");
@@ -892,6 +892,16 @@ class optwindow : public BWindow {
 						if (alert->Go() == 0) {
 							return;
 						}
+						TypeItem *super = win->res->FindType(typea,false);
+						DoubleItem *to_remove;
+						for (int32 i = 0; (to_remove = (DoubleItem *)win->res->ItemUnderAt(super,true,i)) != NULL; i++) {
+							if (to_remove->id == test) {
+								win->Lock();
+								win->res->DeleteSelection(to_remove);
+								win->Unlock();
+								break;
+							}
+						}
 					}
 				} else {
 					attr_info inf;
@@ -899,6 +909,19 @@ class optwindow : public BWindow {
 						BAlert *alert = new BAlert("alert","An attribute with this name already exists. Would you like to overwrite the existing one?","Cancel","OK",NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT);
 						if (alert->Go() == 0) {
 							return;
+						}
+						DoubleItem *to_remove;
+						for (int32 i = 0; win->res->ItemUnderAt(win->res->attributes,false,i) != NULL; i++) {
+							if (!is_instance_of(win->res->ItemUnderAt(win->res->attributes,false,i),DoubleItem))
+								continue;
+							else
+								to_remove = (DoubleItem *)win->res->ItemUnderAt(win->res->attributes,false,i);
+							if (strcmp(to_remove->name,namea) == 0) {
+								win->Lock();
+								win->res->DeleteSelection(to_remove);
+								win->Unlock();
+								break;
+							}
 						}
 					}
 				}
@@ -1206,8 +1229,9 @@ void restypeview::KeyDown(const char *bytes, int32 numBytes) {
 	BOutlineListView::KeyDown(bytes,numBytes);
 }
 
-void restypeview::DeleteSelection(void) {
-	DoubleItem *item = (DoubleItem *)(ItemAt(CurrentSelection()));
+void restypeview::DeleteSelection(DoubleItem *item) {
+	if (item == NULL)
+		item = (DoubleItem *)(ItemAt(CurrentSelection()));
 	TypeItem *type = (TypeItem *)(Superitem(item));
 	if (item->idstring != NULL)
 		((reswindow *)(Window()))->openres->RemoveResource(type->type,item->id);
