@@ -3,6 +3,7 @@
 #include <app/Roster.h>
 #include <interface/RadioButton.h>
 #include <interface/CheckBox.h> 
+#include <interface/Window.h>
 #include <stdio.h>
 //------------------------------------------
 
@@ -14,6 +15,7 @@ extern "C" _EXPORT const char description[] = "Application Flags";
 
 void loaddata(unsigned char *data,size_t length,BView *bkgview) {//runs when add-on starts, window is initialized, you are expected to write to it: rect is 300 x 300
 	uint32 value;
+	uint32 app_flags = 0;
 	if (length == 0) {
 		value = 0;
 	} else {
@@ -46,9 +48,11 @@ void loaddata(unsigned char *data,size_t length,BView *bkgview) {//runs when add
 	BCheckBox *boxes[2];
 	boxes[0] = new BCheckBox(BRect(170,20,280,40),"4","Background App",new BMessage(-200));
 	boxes[1] = new BCheckBox(BRect(170,40,280,60),"5","ARGV Only",new BMessage(-200));
-	if (((*((uint32 *)(data))) & B_BACKGROUND_APP))
+	if (length != 0)
+		app_flags = *((uint32 *)(data));
+	if (app_flags & B_BACKGROUND_APP)
 		boxes[0]->SetValue(true);
-	if (((*((uint32 *)(data))) & B_ARGV_ONLY))
+	if (app_flags & B_ARGV_ONLY)
 		boxes[1]->SetValue(true);
 	bkgview->AddChild(boxes[0]);
 	bkgview->AddChild(boxes[1]);
