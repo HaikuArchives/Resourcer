@@ -8,11 +8,11 @@
 #include "window.h"
 
 int main(void) {
-	openmwindows = 0;
+	openmwindows = 0;       //---This tracks open documents, so we can quit when it's zero--
 	openpanel = NULL;
 	itemLista = NULL;
 	new BRApplication;
-	openpan = false;
+	openpan = false;		//---No open open or save file panels----
 	newpanel = new BFilePanel(B_SAVE_PANEL,NULL,NULL,B_FILE_NODE,false,NULL,NULL,false,true);
 	openpanel = new BFilePanel(B_OPEN_PANEL,NULL,NULL,B_FILE_NODE,false,NULL,new appFilter,false,true);
 	be_app->Run();
@@ -21,54 +21,52 @@ int main(void) {
 }
 
 void DoubleItem::Invoke(bool generic) {
-	reswindow *x = (reswindow *)parent->Window();
-	bool genoverride = generic;
-	if (win != NULL) {
-		if (win != NULL) {
-			win->Hide();
-			win->Show();
-			win->Activate(true);
-		}
+	reswindow *x = (reswindow *)parent->Window(); //----Context is important
+	bool genoverride = generic;					//------whether to use hex editor or not
+	if (win != NULL) {							//------If we are open, we only need to activate our window---
+		win->Hide();
+		win->Show();
+		win->Activate(true);
 		return;
 	}
-	app_info info;
-	be_app->GetAppInfo(&info);
-	BEntry entry(&(info.ref));
-	BDirectory dir;
-	entry.GetParent(&dir);
-	entry.SetTo(&dir,"editors");
-	dir.SetTo(&entry);
-	TypeItem *super = (TypeItem *)parent->Superitem(this);
-	type_code type = super->type;
-	BPath path(&dir,super->TypeCode());
-	plug_in plugin;
-	plugin.win = x;
+	app_info info;                        //-Find the editors directory
+	be_app->GetAppInfo(&info);            //-|
+	BEntry entry(&(info.ref));            //-|
+	BDirectory dir;						  //-|
+	entry.GetParent(&dir);				  //-|
+	entry.SetTo(&dir,"editors");          //-|
+	dir.SetTo(&entry);                    //-|
+	TypeItem *super = (TypeItem *)parent->Superitem(this);  //-Get our type code
+	type_code type = super->type;                           //-|
+	BPath path(&dir,super->TypeCode());					//--editors/typecode, the path of our editor
+	plug_in plugin;										//--handy little struct, holds useful information, the def is in preamble.h
+	plugin.win = x;                                     //-Set it up
 	entry.SetTo(path.Path());
-	BEntry entry2(&dir,"unknown");
-	if ((entry.Exists() == false) || (genoverride == true)) {
-		if (entry2.Exists() == false) {
-			BAlert *alert = new BAlert("noedit","No editor found.","OK",NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT);
+	BEntry entry2(&dir,"unknown");                      //-The hex editor
+	if ((entry.Exists() == false) || (genoverride == true)) { //-Do we not have an editor or do we want to use the hex editor?
+		if (entry2.Exists() == false) {                       //-Does the hex editor exist?
+			BAlert *alert = new BAlert("noedit","No editor found.","OK",NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT); //-Yikes!
 			alert->Go();
 			return;
 		} else {
-			entry2.GetPath(&path);
+			entry2.GetPath(&path); //--Let's use the hex editor
 		}
 	}
-	plugin.plugin = load_add_on(path.Path());
+	plugin.plugin = load_add_on(path.Path()); //--Load the add-on
 	BResources **tfile;
 	if (get_image_symbol(plugin.plugin,"file",B_SYMBOL_TYPE_DATA,(void **)(&tfile)) == B_NO_ERROR)
-		*tfile = x->openres;
+		*tfile = x->openres;  //--------WIND uses this to get info on bits and CSTR resources
 	image_id *tplugin;
 	if (get_image_symbol(plugin.plugin,"me",B_SYMBOL_TYPE_DATA,(void **)(&tplugin)) == B_NO_ERROR)
-		*tplugin = plugin.plugin;
+		*tplugin = plugin.plugin; //---No one uses, but you could to get your plug-in id
 	if (get_image_symbol(plugin.plugin,"loaddata",B_SYMBOL_TYPE_TEXT,(void **)(&(plugin.loaddata))) != B_NO_ERROR) {
 			BAlert *alert = new BAlert("noedit","The editor could not be launched.","OK",NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT);
 			alert->Go();
-			return;
+			return;         //---Load Data loads the data. If it doesn't exist, there's a problem
 	}
 	get_image_symbol(plugin.plugin,"savedata",B_SYMBOL_TYPE_TEXT,(void **)(&(plugin.savedata)));
 	get_image_symbol(plugin.plugin,"messaging",B_SYMBOL_TYPE_TEXT,(void **)(&(plugin.messaging)));
-	unsigned char *data;
+	unsigned char *data; //---Send in our data, we'll delete it later
 	const void *dat;
 	size_t length;
 	if (idstring != NULL) {
@@ -91,9 +89,9 @@ void DoubleItem::Invoke(bool generic) {
 			length = 0;
 		}
 	}
-	plugin.olddata = data;
-	plugin.oldlength = length;
-	char winname[255];
+	plugin.olddata = data;        //---To check if it's changed, we need the original data
+	plugin.oldlength = length;    //-|
+	char winname[255];            //--Set the window name
 	if (idstring == NULL)
 		sprintf(winname,"%s Attribute Name: %s",super->TypeCode(),name);
 	else {
@@ -102,19 +100,14 @@ void DoubleItem::Invoke(bool generic) {
 		else
 			sprintf(winname,"%s Resource Id: %ld Name: %s",super->TypeCode(),id,name);
 	}
-	bool isattr;
-	if (idstring != NULL)
-		isattr = false;
-	else
-		isattr = true;
-	pluginwindow *win = new pluginwindow(&(this->win),plugin,winname,id,type,name,isattr);
+	pluginwindow *win = new pluginwindow(&(this->win),plugin,winname,id,type,name,(idstring == NULL));
 	win->gray = new BView(BRect(0,0,300,300),"graybkgrd",B_FOLLOW_ALL_SIDES,B_WILL_DRAW | B_FRAME_EVENTS);
 	win->gray->SetViewColor(216,216,216);
 	win->AddChild(win->gray);
 	if (length != 0) {	
-		(*(plugin.loaddata))(data,length,win->gray);
+		(*(plugin.loaddata))(data,length,win->gray);  //--Send in data
 	} else {
-		(*(plugin.loaddata))(NULL,0,win->gray);
+		(*(plugin.loaddata))(NULL,0,win->gray);       //--It's a new resource
 	}
 	win->Show();
 }
@@ -125,26 +118,26 @@ void BRApplication::RefsReceived(BMessage *message) {
 		char title[B_FILE_NAME_LENGTH];
 		BEntry entry(&ref,true);
 		entry.GetName(title);
-		new reswindow(title,ref);
-		openpan = false;
+		new reswindow(title,ref); //---reswindow does all the dirty work
+		openpan = false;          //---All these booleans could probably be consolidated
 		saveas = false;
 		alredopen = true;
 	}
 	
-void BRApplication::dissectwindow(BMessage *msg) {
+void BRApplication::dissectwindow(BMessage *msg) { //---Do panel close
 		if (!saveas)
 			return;
 		reswindow *x;
 		msg->FindPointer("reswindow",(void **)(&x));
 		if (x->istempfile) {
-			BEntry(&(x->fileref)).Remove();
+			BEntry(&(x->fileref)).Remove();  //---------Remove the temp file
 			x->changes = false;
 		}
-		if (x->isquitting)
-			x->PostMessage(B_QUIT_REQUESTED);
+		if (x->isquitting)					//----------Was the window quitting and we hit save as?
+			x->PostMessage(B_QUIT_REQUESTED);//---------Close the window
 	}
 	
-void BRApplication::getready(BMessage *message,bool istempfile) { //come back
+void BRApplication::getready(BMessage *message,bool istempfile) { //---Do save as dirty work
 		entry_ref dira;
 		char *name;
 		message->FindRef("directory",&dira);
