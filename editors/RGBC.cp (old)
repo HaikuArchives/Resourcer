@@ -1,0 +1,150 @@
+//------------Includes----------------------
+#include <image.h>
+#include <interface/Window.h>
+#include <stdio.h>
+#include <interface/TextControl.h>
+#include <interface/Box.h>
+#include <support/Beep.h>
+//-------------------------------------------
+
+extern "C" _EXPORT void loaddata(unsigned char *,size_t,BView *);
+extern "C" _EXPORT unsigned char* savedata(size_t *,BView *);
+extern "C" _EXPORT void messaging(BMessage *,BView *);
+extern "C" _EXPORT const char description[] = "RGB Color";
+
+class TextControl : public BTextControl {
+	public:
+	TextControl(BRect frame, const char *name, const char *label, const char *text, BMessage *message) : BTextControl(frame, name,label,text,message) {}
+	void KeyDown(const char *bytes, int32 numBytes) {
+		messaging(new BMessage(-200),Parent());
+		BTextControl::KeyDown(bytes,numBytes);
+	}
+};
+
+void loaddata(unsigned char *data,size_t length,BView *bkgview) {//runs when add-on starts, window is initialized, you are expected to write to it: rect is 300 x 300
+	char mime[256];
+	rgb_color color;
+	color.red = 255;
+	color.green = 255;
+	color.blue = 255;
+	if (length == 0) {
+	} else {
+		color = *((rgb_color *)(data));
+	}
+	bkgview->Window()->ResizeTo(300,185);
+	sprintf(mime,"%d",color.red);
+	BTextControl *v = new BTextControl(BRect(20,5,280,35),"Integera","Red: ",mime,new BMessage(-200),B_FOLLOW_LEFT | B_FOLLOW_TOP,B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS);
+	v->SetDivider(be_plain_font->StringWidth("Red: "));
+	bkgview->AddChild(v);
+	sprintf(mime,"%d",color.green);
+	BTextControl *y = new BTextControl(BRect(20,35,280,65),"Integerb","Green: ",mime,new BMessage(-200),B_FOLLOW_LEFT | B_FOLLOW_TOP,B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS);
+	y->SetDivider(be_plain_font->StringWidth("Green: "));
+	bkgview->AddChild(y);
+	sprintf(mime,"%d",color.blue);
+	BTextControl *z = new BTextControl(BRect(20,65,280,95),"Integerc","Blue: ",mime,new BMessage(-200),B_FOLLOW_LEFT | B_FOLLOW_TOP,B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS);
+	z->SetDivider(be_plain_font->StringWidth("Blue: "));
+	bkgview->AddChild(z);
+	BBox *color2 = new BBox(BRect(130,110,180,160),"color");
+	BView *color3 = new BView(BRect(5,15,45,45),"color2",B_FOLLOW_NONE,B_WILL_DRAW);
+	color2->SetLabel("Color");
+	color3->SetViewColor(color);
+	color2->AddChild(color3);
+	bkgview->AddChild(color2);
+}
+
+unsigned char* savedata(size_t *length,BView *bkgview) { //return data, clean up, and set length to the size of data
+		BTextControl *text = (BTextControl *)(bkgview->FindView("Integera"));
+		rgb_color color;
+		int ransit;
+		sscanf(text->Text(),"%d",&ransit);
+		if (ransit < 0) {
+			ransit = 0;
+			//beep();
+			text->SetText("0");
+		}
+		if (ransit > 255) {
+			ransit = 255;
+			//beep();
+			text->SetText("255");
+		}
+		color.red = ransit;
+		text = (BTextControl *)(bkgview->FindView("Integerb"));
+		sscanf(text->Text(),"%d",&ransit);
+		if (ransit < 0) {
+			ransit = 0;
+			//beep();
+			text->SetText("0");
+		}
+		if (ransit > 255) {
+			ransit = 255;
+			//beep();
+			text->SetText("255");
+		}
+		color.green = ransit;
+		text = (BTextControl *)(bkgview->FindView("Integerc"));
+		sscanf(text->Text(),"%d",&ransit);
+		if (ransit < 0) {
+			ransit = 0;
+			//beep();
+			text->SetText("0");
+		}
+		if (ransit > 255) {
+			ransit = 255;
+			//beep();
+			text->SetText("255");
+		}
+		color.blue = ransit;
+		//window->ChildAt(3)->SetViewColor(color);
+	rgb_color *toreturn = new rgb_color;
+	*toreturn = color;
+	*length = sizeof(rgb_color);
+	return (unsigned char*)(toreturn);
+}
+
+void messaging(BMessage *message,BView *bkgview) { //receives messages from window with negative 'what' members or B_REFS_RECEIVED messages
+	if (message->what == -200) {
+		BTextControl *text = (BTextControl *)(bkgview->FindView("Integera"));
+		rgb_color color;
+		int ransit;
+		sscanf(text->Text(),"%d",&ransit);
+		if (ransit < 0) {
+			ransit = 0;
+			beep();
+			text->SetText("0");
+		}
+		if (ransit > 255) {
+			ransit = 255;
+			beep();
+			text->SetText("255");
+		}
+		color.red = ransit;
+		text = (BTextControl *)(bkgview->FindView("Integerb"));
+		sscanf(text->Text(),"%d",&ransit);
+		if (ransit < 0) {
+			ransit = 0;
+			beep();
+			text->SetText("0");
+		}
+		if (ransit > 255) {
+			ransit = 255;
+			beep();
+			text->SetText("255");
+		}
+		color.green = ransit;
+		text = (BTextControl *)(bkgview->FindView("Integerc"));
+		sscanf(text->Text(),"%d",&ransit);
+		if (ransit < 0) {
+			ransit = 0;
+			beep();
+			text->SetText("0");
+		}
+		if (ransit > 255) {
+			ransit = 255;
+			beep();
+			text->SetText("255");
+		}
+		color.blue = ransit;
+		bkgview->ChildAt(3)->ChildAt(0)->SetViewColor(color);
+		bkgview->ChildAt(3)->ChildAt(0)->Invalidate();
+		}
+}
