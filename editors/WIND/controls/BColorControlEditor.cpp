@@ -102,7 +102,6 @@ void BColorControlEditor::Init()
 									 new BMessage(MSG_COLOR_CONTROL_SET_CELL_SIZE));
 		fCellSize->SetDivider(be_plain_font->StringWidth(fCellSize->Label()));
 		AddControl(fCellSize);
-		SetBottom(bottom + 20);
 	}
 
 	if (!fLayoutField)
@@ -120,7 +119,6 @@ void BColorControlEditor::Init()
 		fLayoutField->SetDivider(be_plain_font->StringWidth(fLayoutField->Label()));
 
 		AddControl(fLayoutField);
-		SetBottom(bottom + 20);
 	}
 
 	if (Target())

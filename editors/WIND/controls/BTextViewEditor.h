@@ -1,14 +1,15 @@
 //------------------------------------------------------------------------------
-//	BControlEditor.h
+//	BTextViewEditor.h
 //
 //------------------------------------------------------------------------------
 
-#ifndef BCONTROLEDITOR_H
-#define BCONTROLEDITOR_H
+#ifndef BTEXTVIEWEDITOR_H
+#define BTEXTVIEWEDITOR_H
 
 // Standard Includes -----------------------------------------------------------
 
 // System Includes -------------------------------------------------------------
+#include <support/String.h>
 
 // Project Includes ------------------------------------------------------------
 
@@ -19,34 +20,40 @@
 
 // Globals ---------------------------------------------------------------------
 
-class BCheckBox;
-
-class BControlEditor : public BViewEditor
+class BTextViewEditor : public BViewEditor
 {
 	public:
-		BControlEditor();
-		~BControlEditor();
+		BTextViewEditor(bool isTextControlChild = false);
+		~BTextViewEditor();
 
 		virtual void		SetTo(BMessage* archive);
 		virtual bool		MessageReceived(BMessage* msg);
 		virtual const char*	Supports();
 
-	protected:
-		BControlEditor(bool showLabel);
-
-		BControl* Target();
-		void SetMessageText(BMessage& msg, BTextControl* text);
-
 	private:
-		void Init();
+		void		Init();
+		BTextView*	Target();
+		void		BuildColorSpaceMenu();
+		void		SetColorSpace(int32 colorspace);
 
-		BTextControl*	fLabelText;
-		BTextControl*	fMsgText;
-		BCheckBox*		fEnabled;
-		bool			fShowLabel;
+		bool			fIsTextControlChild;
+
+		BCheckBox*		fAutoindent;
+		BCheckBox*		fEditable;
+		BCheckBox*		fSelectable;
+		BCheckBox*		fStylable;
+		BCheckBox*		fWordWrap;
+		BMenuField*		fAlignment;
+		BMenuField*		fColorSpace;
+		BTextControl*	fDisallowedChars;
+		BTextControl*	fMaxBytes;
+		BTextControl*	fTabWidth;
+		BTextControl*	fTextRect;
+
+		BString			fDisallowedBuffer;
 };
 
-#endif	// BCONTROLEDITOR_H
+#endif	// BTEXTVIEWEDITOR_H
 
 /*
  * $Log $

@@ -25,7 +25,7 @@ BControlEditor::BControlEditor()
 	:	fLabelText(NULL),
 		fMsgText(NULL),
 		fEnabled(NULL),
-		fShowLabel(false)
+		fShowLabel(true)
 {
 }
 //------------------------------------------------------------------------------
@@ -121,7 +121,6 @@ void BControlEditor::Init()
 									  new BMessage(MSG_CONTROL_SET_LABEL));
 		fLabelText->SetDivider(be_plain_font->StringWidth("Label: "));
 		AddControl(fLabelText);
-		SetBottom(bottom + 20);
 	}
 
 	if (!fMsgText)
@@ -133,7 +132,6 @@ void BControlEditor::Init()
 		fMsgText->TextView()->SetMaxBytes(4);
 		fMsgText->SetDivider(be_plain_font->StringWidth("Message: "));
 		AddControl(fMsgText);
-		SetBottom(bottom + 20);
 	}
 
 	if (!fEnabled)
@@ -143,7 +141,6 @@ void BControlEditor::Init()
 								 "enabled", "Enabled: ",
 								 new BMessage(MSG_CONTROL_SET_ENABLED));
 		AddControl(fEnabled);
-		SetBottom(bottom + 20);
 	}
 }
 //------------------------------------------------------------------------------
@@ -158,6 +155,15 @@ BControlEditor::BControlEditor(bool showLabel)
 BControl* BControlEditor::Target()
 {
 	return dynamic_cast<BControl*>(BViewEditor::Target());
+}
+//------------------------------------------------------------------------------
+void BControlEditor::SetMessageText(BMessage& message, BTextControl* text)
+{
+	char msg[5];
+	msg[0] = 0;
+	strncpy(msg, (char *)(new int32(flipcode(message.what))), 4);
+	msg[4] = 0;
+	text->SetText(msg);
 }
 //------------------------------------------------------------------------------
 

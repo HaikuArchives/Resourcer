@@ -93,7 +93,6 @@ void BBoxEditor::Init()
 									  new BMessage(MSG_BOX_SET_LABEL));
 		fLabelText->SetDivider(be_plain_font->StringWidth("Label: "));
 		AddControl(fLabelText);
-		SetBottom(bottom + 20);
 	}
 
 	if (!fBorderStyle)
@@ -109,7 +108,6 @@ void BBoxEditor::Init()
 		fBorderStyle->Menu()->AddItem(new BMenuItem("None",
 									 new BMessage(MSG_BOX_NO_BORDER)));
 		AddControl(fBorderStyle);
-		SetBottom(bottom + 20);
 	}
 
 	if (Target())

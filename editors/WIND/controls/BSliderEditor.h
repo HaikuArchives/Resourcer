@@ -34,7 +34,10 @@ class BSliderEditor : public BControlEditor
 	private:
 		void Init();
 		BSlider* Target();
-		void SetStyle(int32 style);
+		void SetThumbStyle(int32 style);
+		void SetHashStyle(int32 style);
+		void SetHashLabel(int32 style);
+		void SetOrientation(int32 orient);
 
 		BTextControl*	fModMsg;
 		BTextControl*	fSnoozeAmount;
@@ -46,7 +49,10 @@ class BSliderEditor : public BControlEditor
 		BTextControl*	fMaxValue;
 		BTextControl*	fIncrValue;
 		BTextControl*	fHashCount;
-		BTextControl*	fHashLocation;
+		BTextControl*	fBarThickness;
+		BCheckBox*		fUseFillCheck;
+		BMenuField*		fOrientation;
+		BMenuField*		fHashStyle;
 		BMenuField*		fThumbStyle;
 };
 

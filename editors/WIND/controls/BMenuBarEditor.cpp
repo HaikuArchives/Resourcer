@@ -53,7 +53,6 @@ void BMenuBarEditor::Init()
 	{
 		bottom = Bottom();
 		fMenuEditor = new MenuEditor(BRect(20, bottom, 240, bottom + 230));
-		SetBottom(bottom + 230);
 	}
 
 	if (Target())

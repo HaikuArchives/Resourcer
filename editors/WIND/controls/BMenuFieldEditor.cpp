@@ -95,7 +95,6 @@ void BMenuFieldEditor::Init()
 									  new BMessage(MSG_MENU_FIELD_SET_LABEL));
 		fLabelText->SetDivider(be_plain_font->StringWidth("Label: "));
 		AddControl(fLabelText);
-		SetBottom(bottom + 20);
 	}
 
 	if (!fDefaultText)
@@ -106,14 +105,12 @@ void BMenuFieldEditor::Init()
 										new BMessage(MSG_MENU_SET_DEFAULT_TEXT));
 		fDefaultText->SetDivider(be_plain_font->StringWidth(fDefaultText->Label()));
 		AddControl(fDefaultText);
-		SetBottom(bottom + 20);
 	}
 
 	if (!fMenuEditor)
 	{
 		bottom = Bottom();
 		fMenuEditor = new MenuEditor(BRect(20, bottom, 240, bottom + 230));
-		SetBottom(bottom + 230);
 	}
 
 	if (Target())

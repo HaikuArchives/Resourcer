@@ -102,7 +102,6 @@ void BStringViewEditor::Init()
 									  new BMessage(MSG_STRING_VIEW_SET_TEXT));
 		fLabelText->SetDivider(be_plain_font->StringWidth("Label: "));
 		AddControl(fLabelText);
-		SetBottom(bottom + 20);
 	}
 
 	if (!fLeftAlign)
@@ -112,7 +111,6 @@ void BStringViewEditor::Init()
 									  "left", "Left Alignment",
 									  new BMessage(MSG_STRING_VIEW_ALIGN_LEFT));
 		AddControl(fLeftAlign);
-		SetBottom(bottom + 20);
 	}
 
 	if (!fCenterAlign)
@@ -122,7 +120,6 @@ void BStringViewEditor::Init()
 									  "center", "Center Alignment",
 									  new BMessage(MSG_STRING_VIEW_ALIGN_CENTER));
 		AddControl(fCenterAlign);
-		SetBottom(bottom + 20);
 	}
 
 	if (!fRightAlign)
@@ -132,7 +129,6 @@ void BStringViewEditor::Init()
 									  "right", "Right Alignment",
 									  new BMessage(MSG_STRING_VIEW_ALIGN_RIGHT));
 		AddControl(fRightAlign);
-		SetBottom(bottom + 20);
 	}
 
 	if (Target())

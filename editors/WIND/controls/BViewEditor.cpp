@@ -1,11 +1,14 @@
 //------------------------------------------------------------------------------
 //	BViewEditor.cpp
 //
+// TODO: Add view/high/low color editing
+// TODO: Add font editing
+// TODO: Add view/overlay bitmap editing
+// TODO: Add cursor editing
 //------------------------------------------------------------------------------
 
 // Standard Includes -----------------------------------------------------------
 #include <algorithm>
-#include <vector>
 
 // System Includes -------------------------------------------------------------
 #include <interface/StringView.h>
@@ -25,31 +28,18 @@
 
 // Globals ---------------------------------------------------------------------
 
-class ControlKeeper
-{
-	public:
-		ControlKeeper();
-		~ControlKeeper();
-
-		void AddControl(BView* control);
-
-	private:
-		std::vector<BView*>	fControls;
-};
+BViewEditor::ControlKeeper BViewEditor::fControlKeeper;
 
 //------------------------------------------------------------------------------
 BViewEditor::BViewEditor()
 	:	fClassName(NULL),
 		fViewName(NULL),
-		fBottom(10),
-		fControlKeeper(new ControlKeeper)
+		fBottom(10)
 {
 }
 //------------------------------------------------------------------------------
 BViewEditor::~BViewEditor()
 {
-	if (fControlKeeper)
-		delete fControlKeeper;
 }
 //------------------------------------------------------------------------------
 void BViewEditor::SetParent(BView* parent)
@@ -94,11 +84,6 @@ bool BViewEditor::MessageReceived(BMessage* msg)
 	{
 		case MSG_VIEW_SET_NAME:
 		{
-//			BMessage notify(MSG_VIEW_SET_NAME);
-//			notify.AddString("name", fViewName->Text());
-//			notify.AddPointer("view", fControl.Target(NULL));
-//			
-//			fControl.SendMessage(&notify);
 			Target()->SetName(fViewName->Text());
 			return true;
 		}
@@ -132,14 +117,10 @@ int BViewEditor::Bottom()
 	return fBottom;
 }
 //------------------------------------------------------------------------------
-void BViewEditor::SetBottom(int bottom)
+void BViewEditor::AddControl(BView* control)
 {
-	fBottom = bottom;
-}
-//------------------------------------------------------------------------------
-void BViewEditor::AddControl(BView *control)
-{
-	fControlKeeper->AddControl(control);
+	fBottom += control->Frame().IntegerHeight();
+	fControlKeeper.AddControl(control);
 }
 //------------------------------------------------------------------------------
 BView* BViewEditor::Parent()
@@ -154,7 +135,7 @@ BView* BViewEditor::Target()
 //------------------------------------------------------------------------------
 void BViewEditor::Init()
 {
-	SetBottom(10);
+	fBottom = 10;
 	int bottom;
 	if (!fClassName)
 	{
@@ -162,7 +143,6 @@ void BViewEditor::Init()
 		fClassName = new BStringView(BRect(10, bottom, 190, bottom + 20),
 									 "classname", "Element Type: ");
 		AddControl(fClassName);
-		SetBottom(bottom + 20);
 	}
 
 	if (!fViewName)
@@ -173,7 +153,6 @@ void BViewEditor::Init()
 									 new BMessage(MSG_VIEW_SET_NAME));
 		fViewName->SetDivider(be_plain_font->StringWidth("View Name: "));
 		AddControl(fViewName);
-		SetBottom(bottom + 20);
 	}
 }
 //------------------------------------------------------------------------------
@@ -182,12 +161,12 @@ void BViewEditor::Init()
 //------------------------------------------------------------------------------
 //	#pragma mark -
 //------------------------------------------------------------------------------
-ControlKeeper::ControlKeeper()
+BViewEditor::ControlKeeper::ControlKeeper()
 {
 	;
 }
 //------------------------------------------------------------------------------
-ControlKeeper::~ControlKeeper()
+BViewEditor::ControlKeeper::~ControlKeeper()
 {
 	for (uint32 i = 0; i < fControls.size(); ++i)
 	{
@@ -199,7 +178,7 @@ ControlKeeper::~ControlKeeper()
 	}
 }
 //------------------------------------------------------------------------------
-void ControlKeeper::AddControl(BView* control)
+void BViewEditor::ControlKeeper::AddControl(BView* control)
 {
 	std::vector<BView*>::iterator i = std::find(fControls.begin(),
 												fControls.end(),

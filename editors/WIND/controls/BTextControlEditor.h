@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------------
-//	BControlEditor.h
+//	BTextControlEditor.h
 //
 //------------------------------------------------------------------------------
 
-#ifndef BCONTROLEDITOR_H
-#define BCONTROLEDITOR_H
+#ifndef BTEXTCONTROLEDITOR_H
+#define BTEXTCONTROLEDITOR_H
 
 // Standard Includes -----------------------------------------------------------
 
@@ -13,40 +13,42 @@
 // Project Includes ------------------------------------------------------------
 
 // Local Includes --------------------------------------------------------------
-#include "BViewEditor.h"
+#include "BControlEditor.h"
 
 // Local Defines ---------------------------------------------------------------
 
 // Globals ---------------------------------------------------------------------
 
-class BCheckBox;
+class BTextViewEditor;
 
-class BControlEditor : public BViewEditor
+class BTextControlEditor : public BControlEditor
 {
 	public:
-		BControlEditor();
-		~BControlEditor();
+		BTextControlEditor();
+		~BTextControlEditor();
+
+		virtual void SetParent(BView* parent);
+		virtual void SetTarget(BView* target);
 
 		virtual void		SetTo(BMessage* archive);
 		virtual bool		MessageReceived(BMessage* msg);
 		virtual const char*	Supports();
 
-	protected:
-		BControlEditor(bool showLabel);
-
-		BControl* Target();
-		void SetMessageText(BMessage& msg, BTextControl* text);
-
 	private:
-		void Init();
+		void			Init();
+		BTextControl*	Target();
+		void			GetAlignments(alignment& label, alignment& text);
 
-		BTextControl*	fLabelText;
-		BTextControl*	fMsgText;
-		BCheckBox*		fEnabled;
-		bool			fShowLabel;
+		BTextControl*		fModMsg;
+		BTextControl*		fText;
+		BTextControl*		fDivider;
+		BMenuField*			fLabelAlignment;
+		BMenuField*			fTextAlignment;
+
+		BTextViewEditor*	fTextViewEditor;
 };
 
-#endif	// BCONTROLEDITOR_H
+#endif	// BTEXTCONTROLEDITOR_H
 
 /*
  * $Log $

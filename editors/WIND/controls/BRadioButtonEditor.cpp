@@ -75,7 +75,6 @@ void BRadioButtonEditor::Init()
 								 "selected", "Selected",
 								 new BMessage(MSG_VIEW_SET_CHECKED));
 		AddControl(fChecked);
-		SetBottom(bottom + 20);
 	}
 }
 //------------------------------------------------------------------------------

@@ -50,6 +50,8 @@ SRCS := DragOutlineListView.cpp				\
 		controls/BRadioButtonEditor.cpp		\
 		controls/BSliderEditor.cpp			\
 		controls/BStringViewEditor.cpp		\
+		controls/BTextControlEditor.cpp		\
+		controls/BTextViewEditor.cpp		\
 		controls/BViewEditor.cpp
 # 		ResImageView.cpp		\
 # 		ResourceStringView.cpp	\

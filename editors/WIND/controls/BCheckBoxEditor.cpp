@@ -73,7 +73,6 @@ void BCheckBoxEditor::Init()
 		fChecked = new BCheckBox(BRect(10, bottom, 190, bottom + 20), "checked",
 								 "Checked", new BMessage(MSG_VIEW_SET_CHECKED));
 		AddControl(fChecked);
-		SetBottom(bottom + 20);
 	}
 }
 //------------------------------------------------------------------------------

@@ -7,6 +7,7 @@
 #define BVIEWEDITOR_H
 
 // Standard Includes -----------------------------------------------------------
+#include <vector>
 
 // System Includes -------------------------------------------------------------
 #include <app/Messenger.h>
@@ -32,8 +33,8 @@ class BViewEditor
 		BViewEditor();
 		virtual ~BViewEditor();
 
-		void SetParent(BView* parent);
-		void SetTarget(BView* target);
+		virtual void SetParent(BView* parent);
+		virtual void SetTarget(BView* target);
 
 		virtual void		SetTo(BMessage* archive);
 		virtual bool		MessageReceived(BMessage* msg);
@@ -43,10 +44,11 @@ class BViewEditor
 
 		BMessenger&	Messenger();
 
+		// TODO: Remove when control pool is done
+		void SetBottom(int bottom) { fBottom = bottom; }
 	protected:
 
 		int	Bottom();
-		void SetBottom(int bottom);
 		void AddControl(BView* control);
 		BView* Parent();
 		BView* Target();
@@ -60,7 +62,19 @@ class BViewEditor
 		BView*			fParent;
 		BView*			fTarget;
 		int				fBottom;
-		ControlKeeper*	fControlKeeper;
+
+		class ControlKeeper
+		{
+			public:
+				ControlKeeper();
+				~ControlKeeper();
+		
+				void AddControl(BView* control);
+		
+			private:
+				std::vector<BView*>	fControls;
+		};
+		static ControlKeeper	fControlKeeper;
 };
 
 #endif	// BVIEWEDITOR_H

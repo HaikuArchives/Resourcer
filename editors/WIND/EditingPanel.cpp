@@ -43,6 +43,8 @@
 #include "BCheckBoxEditor.h"
 #include "BRadioButtonEditor.h"
 #include "BColorControlEditor.h"
+#include "BTextViewEditor.h"
+#include "BTextControlEditor.h"
 #include "WIND.h"
 
 // Local Defines ---------------------------------------------------------------
@@ -163,6 +165,8 @@ void EditingPanel::InitEditors()
 	RegisterEditor(new BCheckBoxEditor);
 	RegisterEditor(new BRadioButtonEditor);
 	RegisterEditor(new BColorControlEditor);
+	RegisterEditor(new BTextViewEditor);
+	RegisterEditor(new BTextControlEditor);
 }
 //------------------------------------------------------------------------------
 void EditingPanel::RegisterEditor(BViewEditor* editor)
