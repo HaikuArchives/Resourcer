@@ -124,10 +124,16 @@ void loaddata(unsigned char *data,size_t length,BView *bkgview) { //runs when ed
 
 unsigned char* savedata(size_t *length,BView *bkgview) { //runs when window closes, passes back window address given in loaddata()
 	BPView *x = (BPView *)(bkgview->ChildAt(0));
+	unsigned char *data;
+	if (x->image == NULL) {
+		*length = 0;
+		data = new unsigned char(0);
+		return data;
+	}
 	BBitmapStream *stream = new BBitmapStream(x->image);
 	stream->Seek(0,SEEK_END);
 	*length = stream->Position();
-	unsigned char *data = new unsigned char[*length];
+	data = new unsigned char[*length];
 	stream->Seek(0,SEEK_SET);
 	stream->Read(data,*length);
 	stream->DetachBitmap(&(x->image));
