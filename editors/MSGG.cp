@@ -11,6 +11,7 @@
 #include <interface/ListItem.h>
 #include <app/Message.h>
 #include <app/Application.h>
+#include <app/Roster.h>
 //-------------------------------------------
 
 //------------Prototypes---------------------
@@ -67,7 +68,8 @@ class PlugWin : public BWindow {
 
 //------------C Functions--------------------
 void loaddata(unsigned char *data,size_t length,BView *bkgview) {
-	msg.Unflatten((const char *)(data));
+	if (length != 0)
+		msg.Unflatten((const char *)(data));
 	BRect newFrame = bkgview->Bounds();
 	newFrame.top += 30;
 	newFrame.right -= B_V_SCROLL_BAR_WIDTH;
@@ -164,9 +166,9 @@ void messaging(BMessage *msg,BView *bkgview) {
 	//---------Read Data----------------------------------
 		unsigned char *data;
 		ssize_t length;
-		::msg.FindData(name,type,index,(void **)(&data),&length);
+		::msg.FindData(name,type,index,(const void **)(&data),&length);
 		char title[255];
-		sprintf(title,"Field Type: %s Name: %s Index: %d",TypeItem(type).TypeAsString(),name,index);
+		sprintf(title,"Field Type: %s Name: %s Index: %ld",TypeItem(type).TypeAsString(),name,index);
 		win = new PlugWin(type,name,index,savedata,messaging,title);
 		win->gray = new BView(BRect(0,0,300,300),"graybkgrd",B_FOLLOW_ALL_SIDES,B_WILL_DRAW | B_FRAME_EVENTS);
 		win->gray->SetViewColor(216,216,216);
@@ -192,7 +194,7 @@ void InitListView(void) {
 		msgview->AddUnder(superb,super);
 		if (c > 1) {
 			for (j = 0;j < c;j++) {
-				sprintf(count,"%d",(c-1) - j);
+				sprintf(count,"%ld",(c-1) - j);
 				msgview->AddUnder(new BStringItem(count),superb);
 			}
 		}
@@ -230,7 +232,7 @@ void GetSelected(type_code *type, int32 *index, char **name) {
 			*type = ((TypeItem *)(msgview->Superitem(selected)))->Type();
 			break;
 		case 2:
-			sscanf(selected->Text(),"%d",index);
+			sscanf(selected->Text(),"%ld",index);
 			*name = new char[strlen(((BStringItem *)(msgview->Superitem(selected)))->Text()) + 1];
 			strcpy(*name,((BStringItem *)(msgview->Superitem(selected)))->Text());
 			*type = ((TypeItem *)(msgview->Superitem(msgview->Superitem(selected))))->Type();
