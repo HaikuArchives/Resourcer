@@ -84,7 +84,7 @@ void EditingControl::KeyDown(const char *bytes,int32 numBytes)
 		delete controlled;
 		controlled = NULL;
 		notInit = true;
-		editpanel->SetTo((BView*)NULL);
+		editpanel->SetTo(NULL);
 		ResizeTo(1,1);
 		MoveTo(0,0);
 		Invalidate(Bounds());
@@ -167,6 +167,7 @@ void EditingControl::Pulse(void)
 		{
 			BMessage ctrl;
 			cur->Archive(&ctrl);
+			ctrl.AddMessenger("Resourcer:messenger", cur);
 			active.AddMessage("ctrl", &ctrl);
 		}
 		editpanel->SetTo(&active);

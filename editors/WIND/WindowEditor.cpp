@@ -160,6 +160,7 @@ void WindowEditor::MessageReceived(BMessage *msg)
 			msg->FindPointer("source",(void **)(&cbox));
 			fwd.what = msg->what;
 			fwd.AddBool("addmenu", cbox->Value() == B_CONTROL_ON);
+			fEditWindow.SendMessage(&fwd);
 			break;
 		}
 
@@ -455,7 +456,12 @@ void WindowEditor::InitFlagsBoxes()
 
 	AddChild(box);
 
-	((BCheckBox*)FindView("menus"))->SetValue(fWindowInfo.has_menu);
+	cbox = (BCheckBox*)FindView("menus");
+	if (cbox)
+	{
+		cbox->SetValue(fWindowInfo.has_menu);
+		cbox->SetMessage(new BMessage(MSG_WINDOW_ADD_MENU));
+	}
 }
 //------------------------------------------------------------------------------
 uint32 WindowEditor::MakeBitmask(void)

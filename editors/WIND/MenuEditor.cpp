@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 
 // Standard Includes -----------------------------------------------------------
+#include <string.h>
 
 // System Includes -------------------------------------------------------------
 #include <interface/Button.h>
@@ -13,6 +14,8 @@
 #include <interface/MenuItem.h>
 #include <interface/ScrollView.h>
 #include <interface/TextControl.h>
+
+#include <support/ClassInfo.h>
 
 // Project Includes ------------------------------------------------------------
 
@@ -27,97 +30,270 @@
 // Globals ---------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-MenuEditor::MenuEditor(BMenu *men,BRect rect) : BBox(rect,"menueditor") {
-	menu = men;
+MenuEditor::MenuEditor(BRect rect, BMenu* men)
+	:	BBox(rect, "menueditor"),
+		fListView(NULL),
+		fMenu(men),
+		fLabelText(NULL),
+		fMsgText(NULL),
+		fShortcutText(NULL),
+		fModifierField(NULL),
+		fEnabledBox(NULL),
+		fAddItemBtn(NULL),
+		fAddSeparatorBtn(NULL),
+		fInit(false)
+{
 	SetViewColor(216,216,216);
-	lview = new DragOutlineListView(BRect(10,10,rect.Width() - 10 - B_V_SCROLL_BAR_WIDTH,100),menu);
-	AddChild(new BScrollView("itemscroll",lview,B_FOLLOW_LEFT | B_FOLLOW_TOP,0,false,true));
-	BTextControl *tcont = new BTextControl(BRect(10,110,rect.Width() - 10,130),"label","Label: ","",new BMessage(MSG_MENU_SET_ITEM_LABEL));
-	tcont->SetDivider(be_plain_font->StringWidth(tcont->Label()));
-	tcont->SetEnabled(false);
-	AddChild(tcont);
-	char msg[5];
-	msg[0] = 0;
-	strcpy(msg,"none");
-	/*if (((BControl *)(pointer))->Message() != NULL)
-		strncpy(msg,(char *)(new int32(((BControl *)(pointer))->Message()->what)),4);*/
-	BTextControl *name = new BTextControl(BRect(10,130,rect.Width() - 10,150),"msg","Message: ",msg,new BMessage(MSG_MENU_SET_ITEM_MSG));
-	name->TextView()->SetMaxBytes(4);
-	name->SetDivider(be_plain_font->StringWidth("Message: "));
-	name->SetEnabled(false);
-	AddChild(name);
-	tcont = new BTextControl(BRect(10,150,be_plain_font->StringWidth("Shortcut: ") + 40,170),"shrtct","Shortcut: ","",new BMessage(MSG_MENU_SET_ITEM_SHORTCUT));
-	tcont->SetDivider(be_plain_font->StringWidth(tcont->Label()));
-	tcont->SetEnabled(false);
-	tcont->TextView()->SetMaxBytes(1);
-	AddChild(tcont);
-	BMenu *meniu = new BMenu("Modifier Keys");
-	meniu->AddItem(new BMenuItem("Option",new BMessage(MSG_MENU_SET_ITEM_MARKED)));
-	meniu->AddItem(new BMenuItem("Shift",new BMessage(MSG_MENU_SET_ITEM_MARKED)));
-	meniu->AddItem(new BMenuItem("Control",new BMessage(MSG_MENU_SET_ITEM_MARKED)));
-	AddChild(new BMenuField(BRect(be_plain_font->StringWidth("Shortcut: ") + 50,150,rect.Width() - 10,170),"modchoice",NULL,meniu));
-	((BMenuField *)(FindView("modchoice")))->SetEnabled(false);
-	meniu->SetRadioMode(false);
-	meniu->SetLabelFromMarked(false);
-	AddChild(new BCheckBox(BRect(10,175,rect.Width() - 10,195),"enabled","Enabled",new BMessage(MSG_MENU_SET_ITEM_ENABLED)));
-	((BCheckBox *)(FindView("enabled")))->SetEnabled(false);
-	AddChild(new BButton(BRect(10,200,(rect.Width()/2)-10,220),"addiantem","Add Item",new BMessage(MSG_MENU_NEW_ITEM)));
-	AddChild(new BButton(BRect((rect.Width()/2)+10,200,rect.Width() - 10,220),"addsepitem","Add Separator",new BMessage(MSG_MENU_ADD_SEPARATOR)));
+
+	BRect frame(10, 10, rect.Width() - 10 - B_V_SCROLL_BAR_WIDTH, 100);
+	fListView = new DragOutlineListView(frame, Menu());
+	fListView->SetSelectionMessage(new BMessage(MSG_MENU_SELECTION_CHANGED));
+	AddChild(new BScrollView("itemscroll", fListView,
+							 B_FOLLOW_LEFT | B_FOLLOW_TOP, 0, false, true));
 }
 //------------------------------------------------------------------------------
-void MenuEditor::MessageReceived(BMessage *msg) {
-	BMenuItem *item;
-	switch(msg->what) {
+void MenuEditor::AttachedToWindow()
+{
+	if (!fInit)
+	{
+		BRect rect(Frame());
+		BRect frame(10, 110, rect.Width() - 10, 130);
+		fLabelText = new BTextControl(frame, "label", "Label: ", "",
+									  new BMessage(MSG_MENU_SET_ITEM_LABEL));
+		fLabelText->SetDivider(be_plain_font->StringWidth("Label: "));
+		fLabelText->SetEnabled(false);
+		AddChild(fLabelText);
+
+		char msg[5];
+		msg[0] = 0;
+		strcpy(msg,"none");
+		/*if (((BControl *)(pointer))->Message() != NULL)
+			strncpy(msg,(char *)(new int32(((BControl *)(pointer))->Message()->what)),4);*/
+
+		frame.Set(10, 130, rect.Width() - 10, 150);
+		fMsgText = new BTextControl(frame, "msg", "Message: ", msg,
+									new BMessage(MSG_MENU_SET_ITEM_MSG));
+		fMsgText->TextView()->SetMaxBytes(4);
+		fMsgText->SetDivider(be_plain_font->StringWidth("Message: "));
+		fMsgText->SetEnabled(false);
+		AddChild(fMsgText);
+
+		frame.Set(10, 150, be_plain_font->StringWidth("Shortcut: ") + 40, 170);
+		fShortcutText = new BTextControl(frame, "shrtct", "Shortcut: ", "",
+										 new BMessage(MSG_MENU_SET_ITEM_SHORTCUT));
+		fShortcutText->SetDivider(be_plain_font->StringWidth("Shortcut: "));
+		fShortcutText->SetEnabled(false);
+		fShortcutText->TextView()->SetMaxBytes(1);
+		AddChild(fShortcutText);
+
+		BMenu *meniu = new BMenu("Modifier Keys");
+		meniu->AddItem(new BMenuItem("Option", new BMessage(MSG_MENU_SET_ITEM_MARKED)));
+		meniu->AddItem(new BMenuItem("Shift", new BMessage(MSG_MENU_SET_ITEM_MARKED)));
+		meniu->AddItem(new BMenuItem("Control", new BMessage(MSG_MENU_SET_ITEM_MARKED)));
+		frame.Set(be_plain_font->StringWidth("Shortcut: ") + 50, 150,
+					rect.Width() - 10, 170);
+		fModifierField = new BMenuField(frame, "modchoice", NULL, meniu);
+		fModifierField->SetEnabled(false);
+		meniu->SetRadioMode(false);
+		meniu->SetLabelFromMarked(false);
+		AddChild(fModifierField);
+
+		frame.Set(10, 175, rect.Width() - 10, 195);
+		fEnabledBox = new BCheckBox(frame, "enabled", "Enabled",
+									new BMessage(MSG_MENU_SET_ITEM_ENABLED));
+		fEnabledBox->SetEnabled(false);
+		AddChild(fEnabledBox);
+
+		frame.Set(10, 200, (rect.Width() / 2) - 10, 220);
+		fAddItemBtn = new BButton(frame, "addiantem", "Add Item",
+								  new BMessage(MSG_MENU_NEW_ITEM));
+		AddChild(fAddItemBtn);
+		frame.Set((rect.Width() / 2) + 10, 200, rect.Width() - 10, 220);
+		fAddSeparatorBtn = new BButton(frame, "addsepitem", "Add Separator",
+									   new BMessage(MSG_MENU_ADD_SEPARATOR));
+		AddChild(fAddSeparatorBtn);
+	}
+
+	fListView->SetTarget(this);
+	fLabelText->SetTarget(this);
+	fMsgText->SetTarget(this);
+	fShortcutText->SetTarget(this);
+	fModifierField->Menu()->SetTargetForItems(this);
+	fEnabledBox->SetTarget(this);
+	fAddItemBtn->SetTarget(this);
+	fAddSeparatorBtn->SetTarget(this);
+}
+//------------------------------------------------------------------------------
+void MenuEditor::MessageReceived(BMessage* msg)
+{
+	BMenuItem* item;
+	switch (msg->what)
+	{
 		case MSG_MENU_NEW_ITEM:
-			item = new BMenuItem("New Item",new BMessage('none'));
-			menu->AddItem(item);
-			lview->Refresh(false);
+		{
+			if (fMenu)
+			{
+				fMenu->AddItem(new BMenuItem("New Item",
+											 new BMessage('none')));
+				fListView->Refresh(false);
+			}
 			break;
+		}
+
 		case MSG_MENU_SET_ITEM_LABEL:
-			item = ((MenuListItem *)(lview->FullListItemAt(lview->FullListCurrentSelection())))->item;
-			item->SetLabel(((BTextControl *)(FindView("label")))->Text());
-			lview->Refresh(true);
+			CurrentItem()->SetLabel(fLabelText->Text());
+			fListView->Refresh(true);
 			break;
+
 		case MSG_MENU_SET_ITEM_MSG:
-			item = ((MenuListItem *)(lview->FullListItemAt(lview->FullListCurrentSelection())))->item;
-			item->SetMessage(new BMessage(flipcode(*((int32 *)(((BTextControl *)(FindView("msg")))->Text())))));
+		{
+			int32 what = flipcode(*((int32 *)(fMsgText->Text())));
+			CurrentItem()->SetMessage(new BMessage(what));
 			break;
+		}
+
 		case MSG_MENU_SET_ITEM_MARKED:
-			msg->FindPointer("source",(void **)(&item));
-			if (item->IsMarked())
-				item->SetMarked(false);
-			else
-				item->SetMarked(true);
+			msg->FindPointer("source", (void **)(&item));
+			item->SetMarked(!item->IsMarked());
+
 		case MSG_MENU_SET_ITEM_SHORTCUT:
-			item = ((MenuListItem *)(lview->FullListItemAt(lview->FullListCurrentSelection())))->item;
-			item->SetShortcut(*(((BTextControl *)(FindView("shrtct")))->Text()),make_mod_mask());
+		{
+			if (fShortcutText->TextView()->TextLength() == 0)
+			{
+				fModifierField->Menu()->ItemAt(0)->SetMarked(false);
+				fModifierField->Menu()->ItemAt(1)->SetMarked(false);
+				fModifierField->Menu()->ItemAt(2)->SetMarked(false);
+				fModifierField->SetEnabled(false);
+			}
+			else if (!fModifierField->IsEnabled())
+			{
+				fModifierField->SetEnabled(true);
+			}
+			CurrentItem()->SetShortcut(*(fShortcutText->Text()), MakeModMask());
+
 			break;
+		}
+
 		case MSG_MENU_SET_ITEM_ENABLED:
-			item = ((MenuListItem *)(lview->FullListItemAt(lview->FullListCurrentSelection())))->item;
-			if (((BCheckBox *)(FindView("enabled")))->Value() == B_CONTROL_ON)
-				item->SetEnabled(true);
-			else
-				item->SetEnabled(false);
+		{
+			CurrentItem()->SetEnabled(fEnabledBox->Value() == B_CONTROL_ON);
 			break;
+		}
+
 		case MSG_MENU_ADD_SEPARATOR:
-			item = new BSeparatorItem;
-			menu->AddItem(item);
-			lview->Refresh(false);
+		{
+			if (fMenu)
+			{
+				item = new BSeparatorItem;
+				fMenu->AddItem(item);
+				fListView->Refresh(false);
+			}
+			break;
+		}
+
+		case MSG_MENU_SELECTION_CHANGED:
+		{
+			OnSelectionChanged(msg);
+			break;
+		}
+
+		default:
+			BBox::MessageReceived(msg);
 			break;
 	}
 }
 //------------------------------------------------------------------------------
-uint32 MenuEditor::make_mod_mask(void) {
-	BMenu *men = ((BMenuField *)(FindView("modchoice")))->Menu();
+void MenuEditor::SetMenu(BMenu* menu)
+{
+	fMenu = menu;
+	fListView->SetMenu(menu);
+}
+//------------------------------------------------------------------------------
+BMenu* MenuEditor::Menu()
+{
+	return fMenu;
+}
+//------------------------------------------------------------------------------
+uint32 MenuEditor::MakeModMask(void)
+{
 	uint32 modifiers = 0;
-	if (men->ItemAt(0)->IsMarked())
-		modifiers = modifiers | B_OPTION_KEY;
-	if (men->ItemAt(1)->IsMarked())
-		modifiers = modifiers | B_SHIFT_KEY;
-	if (men->ItemAt(2)->IsMarked())
-		modifiers = modifiers | B_CONTROL_KEY;
+	if (fModifierField->Menu()->ItemAt(0)->IsMarked())
+	{
+		modifiers |= B_OPTION_KEY;
+	}
+	if (fModifierField->Menu()->ItemAt(1)->IsMarked())
+	{
+		modifiers |= B_SHIFT_KEY;
+	}
+	if (fModifierField->Menu()->ItemAt(2)->IsMarked())
+	{
+		modifiers |= B_CONTROL_KEY;
+	}
 	return modifiers;
 }	
+//------------------------------------------------------------------------------
+BMenuItem* MenuEditor::CurrentItem()
+{
+	int32 index = fListView->FullListCurrentSelection();
+	return ((MenuListItem *)(fListView->FullListItemAt(index)))->item;
+}
+//------------------------------------------------------------------------------
+void MenuEditor::OnSelectionChanged(BMessage* /*msg*/)
+{
+	if ((fListView->CurrentSelection() < 0) ||
+		is_kind_of(CurrentItem(), BSeparatorItem))
+	{
+		fLabelText->SetText("");
+		fLabelText->SetEnabled(false);
+		fMsgText->SetText("none");
+		fMsgText->SetEnabled(false);
+		fShortcutText->SetText("");
+		fShortcutText->SetEnabled(false);
+		fModifierField->Menu()->ItemAt(0)->SetMarked(false);
+		fModifierField->Menu()->ItemAt(1)->SetMarked(false);
+		fModifierField->Menu()->ItemAt(2)->SetMarked(false);
+		fModifierField->SetEnabled(false);
+		fEnabledBox->SetEnabled(false);
+		fEnabledBox->SetValue(B_CONTROL_OFF);
+		return;
+	}
+	else
+	{
+		fLabelText->SetEnabled(true);
+		fMsgText->SetEnabled(true);
+
+		fModifierField->Menu()->ItemAt(0)->SetMarked(false);
+		fModifierField->Menu()->ItemAt(1)->SetMarked(false);
+		fModifierField->Menu()->ItemAt(2)->SetMarked(false);
+
+		fEnabledBox->SetEnabled(true);
+		fEnabledBox->SetValue(CurrentItem()->IsEnabled());
+
+		fShortcutText->SetEnabled(CurrentItem()->Submenu() == NULL);
+	}
+	fLabelText->SetText(CurrentItem()->Label());
+	char temp[5];
+	BMenuItem *item = CurrentItem();
+	if (item->Message() != NULL)
+		strncpy(temp, (char *)(new int32(flipcode(item->Message()->what))), 4);
+	else
+		strcpy(temp, "none");
+	temp[4] = 0;
+	fMsgText->SetText(temp);
+
+	uint32 mod;
+	temp[1] = 0;
+	temp[0] = item->Shortcut(&mod);
+	fShortcutText->SetText(temp);
+
+	fModifierField->SetEnabled(*temp);
+	if (*temp)
+	{
+		fModifierField->Menu()->ItemAt(0)->SetMarked(mod & B_OPTION_KEY);
+		fModifierField->Menu()->ItemAt(1)->SetMarked(mod & B_SHIFT_KEY);
+		fModifierField->Menu()->ItemAt(2)->SetMarked(mod & B_CONTROL_KEY);
+	}
+}
 //------------------------------------------------------------------------------
 
 /*

@@ -30,16 +30,27 @@ TYPE := SHARED
 #	if two source files with the same name (source.c or source.cpp)
 #	are included from different directories.  Also note that spaces
 #	in folder names do not work well with this makefile.
-SRCS := DragOutlineListView.cpp	\
-		EditingControl.cpp		\
-		EditingPanel.cpp		\
-		EditingWindow.cpp		\
-		Filters.cpp				\
-		MenuEditor.cpp			\
-		MenuListItem.cpp		\
-		ResourceIO.cpp			\
-		WIND.cp					\
-		WindowEditor.cpp
+SRCS := DragOutlineListView.cpp				\
+		EditingControl.cpp					\
+		EditingPanel.cpp					\
+		EditingWindow.cpp					\
+		Filters.cpp							\
+		MenuEditor.cpp						\
+		MenuListItem.cpp					\
+		ResourceIO.cpp						\
+		WIND.cp								\
+		WindowEditor.cpp					\
+		controls/BBoxEditor.cpp				\
+		controls/BButtonEditor.cpp			\
+		controls/BCheckBoxEditor.cpp		\
+		controls/BColorControlEditor.cpp	\
+		controls/BControlEditor.cpp			\
+		controls/BMenuBarEditor.cpp			\
+		controls/BMenuFieldEditor.cpp		\
+		controls/BRadioButtonEditor.cpp		\
+		controls/BSliderEditor.cpp			\
+		controls/BStringViewEditor.cpp		\
+		controls/BViewEditor.cpp
 # 		ResImageView.cpp		\
 # 		ResourceStringView.cpp	\
 
@@ -83,7 +94,7 @@ SYSTEM_INCLUDE_PATHS :=
 #	additional paths to look for local headers
 #	thes use the form: #include "header"
 #	source file directories are automatically included
-LOCAL_INCLUDE_PATHS := 
+LOCAL_INCLUDE_PATHS := loki
 
 #	specify the level of optimization that you desire
 #	NONE, SOME, FULL
@@ -113,7 +124,7 @@ SYMBOLS := TRUE
 DEBUGGER := TRUE
 
 #	specify additional compiler flags for all files
-COMPILER_FLAGS :=
+COMPILER_FLAGS := 
 
 #	specify additional linker flags
 LINKER_FLAGS :=

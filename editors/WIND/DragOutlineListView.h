@@ -37,8 +37,13 @@ class DragOutlineListView : public BOutlineListView
 		void AddSubItem(MenuListItem *add, MenuListItem *tothis);
 		void RemoveSubMenu(BMenuItem *toremfrom);
 
+		void SetMenu(BMenu* menu);
+		BMenu* Menu();
+
 	private:
-		BMenu *menu;
+		void LoadMenu();
+
+		BMenu* fMenu;
 };
 //------------------------------------------------------------------------------
 

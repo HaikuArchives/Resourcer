@@ -1,18 +1,15 @@
 //------------------------------------------------------------------------------
-//	EditingPanel.h
+//	BViewEditor.h
 //
 //------------------------------------------------------------------------------
 
-#ifndef EDITINGPANEL_H
-#define EDITINGPANEL_H
+#ifndef BVIEWEDITOR_H
+#define BVIEWEDITOR_H
 
 // Standard Includes -----------------------------------------------------------
-#include <map>
-#include <string>
 
 // System Includes -------------------------------------------------------------
 #include <app/Messenger.h>
-#include <interface/View.h>
 
 // Project Includes ------------------------------------------------------------
 
@@ -22,38 +19,51 @@
 
 // Globals ---------------------------------------------------------------------
 
-class BViewEditor;
+class BStringView;
+class BTextControl;
+class BView;
+class BWindow;
 
-//------------------------------------------------------------------------------
-class EditingPanel : public BView
+class ControlKeeper;
+
+class BViewEditor
 {
 	public:
-		EditingPanel(void);
-		~EditingPanel();
+		BViewEditor();
+		virtual ~BViewEditor();
 
-		void AttachedToWindow();
-		void MessageReceived(BMessage *msg);
+		void SetParent(BView* parent);
+		void SetTarget(BView* target);
 
-		void SetTo(BMessage* active);
+		virtual void		SetTo(BMessage* archive);
+		virtual bool		MessageReceived(BMessage* msg);
+		virtual const char*	Supports();
 
-		BResources *reso;
+		BWindow* Window();
+
+		BMessenger&	Messenger();
+
+	protected:
+
+		int	Bottom();
+		void SetBottom(int bottom);
+		void AddControl(BView* control);
+		BView* Parent();
+		BView* Target();
 
 	private:
-		void InitEditors();
-		void RegisterEditor(BViewEditor* editor);
-		void CleanupEditors();
+		void Init();
 
-		typedef std::map<std::string, BViewEditor*>	EditorMap;
-
-		EditorMap		fEditorMap;
-		BViewEditor*	fCurrentEditor;
-		bool			iscontrol;
-		BView*			pointer;
 		BMessenger		fControl;
+		BStringView*	fClassName;
+		BTextControl*	fViewName;
+		BView*			fParent;
+		BView*			fTarget;
+		int				fBottom;
+		ControlKeeper*	fControlKeeper;
 };
-//------------------------------------------------------------------------------
 
-#endif	// EDITINGPANEL_H
+#endif	// BVIEWEDITOR_H
 
 /*
  * $Log $

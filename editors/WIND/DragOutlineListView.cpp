@@ -29,18 +29,10 @@
 // Globals ---------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-DragOutlineListView::DragOutlineListView(BRect rect,BMenu *men)
+DragOutlineListView::DragOutlineListView(BRect rect, BMenu* men)
 	:	BOutlineListView(rect, "itemeditor")
 {
-	menu = men;
-	BMenuItem *cur = NULL;
-	for (int32 i = 0; menu->ItemAt(i) != NULL; i++)
-	{
-		cur = menu->ItemAt(i);
-		MenuListItem *toadd = new MenuListItem(cur,this);
-		AddItem(toadd);
-		toadd->CheckSub();
-	}
+	SetMenu(men);
 }
 //------------------------------------------------------------------------------
 void DragOutlineListView::Refresh(bool noItemsAdded)
@@ -50,19 +42,14 @@ void DragOutlineListView::Refresh(bool noItemsAdded)
 		old = FullListCurrentSelection();
 	MakeEmpty();
 	SelectionChanged();
-	BMenuItem *cur = NULL;
-	for (int32 i = 0; menu->ItemAt(i) != NULL; i++) {
-		cur = menu->ItemAt(i);
-		MenuListItem *toadd = new MenuListItem(cur,this);
-		AddItem(toadd);
-		toadd->CheckSub();
-	}
+	LoadMenu();
 	if (noItemsAdded)
 		Select(old);
 }
 //------------------------------------------------------------------------------
 void DragOutlineListView::SelectionChanged(void)
 {
+#if 0
 	Window()->Lock();
 	if ((CurrentSelection() < 0) || is_kind_of(((MenuListItem *)(FullListItemAt(FullListCurrentSelection())))->item,BSeparatorItem)) {
 		((BTextControl *)(Parent()->Parent()->FindView("label")))->SetText("");
@@ -122,6 +109,7 @@ void DragOutlineListView::SelectionChanged(void)
 		((BMenuField *)(Parent()->Parent()->FindView("modchoice")))->Menu()->ItemAt(2)->SetMarked(true);
 	if (Window()->IsLocked())
 		Window()->Unlock();
+#endif
 }
 //------------------------------------------------------------------------------
 bool DragOutlineListView::InitiateDrag(BPoint /*point*/, int32 index,
@@ -251,10 +239,12 @@ void DragOutlineListView::WatchMouse(void)
 //------------------------------------------------------------------------------
 void DragOutlineListView::MessageReceived(BMessage *msg)
 {
-	if (!(msg->WasDropped()))
+	if (!(msg->WasDropped()) || msg->what != 'dolv')
+	{
+		BOutlineListView::MessageReceived(msg);
 		return;
-	if (msg->what != 'dolv')
-		return;
+	}
+
 	MenuListItem *item;
 	msg->FindPointer("item",(void **)(&item));
 	BPoint newloc = msg->DropPoint();
@@ -262,10 +252,14 @@ void DragOutlineListView::MessageReceived(BMessage *msg)
 	int32 ind = IndexOf(newloc);
 	BMenu *men;
 	if (ind < 0) {
+		if (!fMenu)
+		{
+			debugger("DragOutlineListView::fMenu is NULL");
+		}
 		BMenuItem *menite = item->item->Menu()->Superitem();
 		men = item->item->Menu();
 		men->RemoveItem(item->item);
-		menu->AddItem(item->item);
+		fMenu->AddItem(item->item);
 		if (menite != NULL) {
 			if (menite->Submenu() != NULL) {
 				if (menite->Submenu()->CountItems() == 0)
@@ -363,6 +357,32 @@ void DragOutlineListView::RemoveSubMenu(BMenuItem *toremfrom)
 	delete addunder;
 	addunder = temp;
 	men->AddItem(addunder,ind);
+}
+//------------------------------------------------------------------------------
+void DragOutlineListView::SetMenu(BMenu* menu)
+{
+	fMenu = menu;
+	LoadMenu();
+}
+//------------------------------------------------------------------------------
+BMenu* DragOutlineListView::Menu()
+{
+	return fMenu;
+}
+//------------------------------------------------------------------------------
+void DragOutlineListView::LoadMenu()
+{
+	if (fMenu)
+	{
+		BMenuItem *cur = NULL;
+		for (int32 i = 0; fMenu->ItemAt(i) != NULL; i++)
+		{
+			cur = fMenu->ItemAt(i);
+			MenuListItem *toadd = new MenuListItem(cur,this);
+			AddItem(toadd);
+			toadd->CheckSub();
+		}
+	}
 }
 //------------------------------------------------------------------------------
 
