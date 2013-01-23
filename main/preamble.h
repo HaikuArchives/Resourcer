@@ -35,7 +35,7 @@ typedef struct{
 
 class appFilter : public BRefFilter {
 	public:
-		bool Filter(const entry_ref *ref, BNode *node, struct stat *st,
+		bool Filter(const entry_ref *ref, BNode *node, struct stat_beos *st,
 					   const char *mimetype) {
 			if (BEntry(ref,true).IsDirectory())
 				return true;
@@ -45,6 +45,8 @@ class appFilter : public BRefFilter {
 				return true;
 			return false;
 		}
+//		virtual	bool Filter(const entry_ref* ref, BNode* node,
+//						struct stat_beos* stat, const char* mimeType) = 0;
 };
 
 BRect find_center(uint32 width, uint32 height) {

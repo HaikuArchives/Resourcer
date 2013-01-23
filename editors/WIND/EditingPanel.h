@@ -13,6 +13,7 @@
 // System Includes -------------------------------------------------------------
 #include <app/Messenger.h>
 #include <interface/View.h>
+#include <Resources.h>
 
 // Project Includes ------------------------------------------------------------
 

@@ -97,7 +97,7 @@ void decodeformat(unsigned char *buffer,media_raw_audio_format *format,size_t si
 }
 
 class AIFFilter : public BRefFilter {
-	bool Filter(const entry_ref *ref, BNode *node, struct stat *st, const char *filetype) {
+	bool Filter(const entry_ref *ref, BNode *node, struct stat_beos *st, const char *filetype) {
 		if ((strcmp(filetype,"audio/x-aiff") == 0) || (BEntry(ref,true).IsDirectory()))
 			return true;
 		else

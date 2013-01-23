@@ -39,7 +39,7 @@ BRect find_center(uint32 width, uint32 height, BRect a) {
 	}
 
 class TIFFilter : public BRefFilter {
-	bool Filter(const entry_ref *ref, BNode *node, struct stat *st, const char *filetype) {
+	virtual bool Filter(const entry_ref *ref, BNode *node, struct stat_beos *st, const char *filetype) {
 		if (BEntry(ref,true).IsDirectory())
 			return true;
 		if (BEntry(ref,true).IsFile()) {
