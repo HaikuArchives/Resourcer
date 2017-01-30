@@ -1,7 +1,7 @@
 class reswindow;
 BRect find_center(uint32 width, uint32 height);
 BRect find_center(BRect rect,uint32 width, uint32 height);
-#if __INTEL__
+#if __INTEL__ || defined(__x86_64__)
 	type_code flipcode (type_code original);
 #endif
 #if __POWERPC__
@@ -18,7 +18,7 @@ typedef struct{
 } plug_in;
 
 
-#if __INTEL__
+#if __INTEL__ || defined(__x86_64__)
 	type_code flipcode (type_code original) {
 		type_code type = original;
 		char *one = (char *)(&original);

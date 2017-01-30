@@ -276,7 +276,7 @@ void restypeview::MessageReceived(BMessage *msg) {
 				msg->FindString("name",(const char **)(&name));
 				BDirectory dir(&ref);
 				BFile file(&dir,name,B_READ_WRITE | B_CREATE_FILE);
-				void *data;
+				unsigned char *data;
 				bool isattr;
 				prev->FindBool("isattr",&isattr);
 				if (!isattr) {
@@ -410,7 +410,7 @@ void restypeview::MessageReceived(BMessage *msg) {
 					data = new unsigned char[size];
 					map.Read(data,size);
 					size_t tempSize = temp->BitsLength();
-					memcpy((void *)(uint32(data) + (size - tempSize)),temp->Bits(),tempSize);
+					memcpy((void *)(addr_t(data) + (size - tempSize)),temp->Bits(),tempSize);
 					map.DetachBitmap(&temp);
 					delete temp;
 					type = 'bits';
@@ -567,7 +567,7 @@ int32 getdata(void *y) {
 				data = new unsigned char[size];
 				map.Read(data,size);
 				size_t tempSize = temp->BitsLength();
-				memcpy((void *)(uint32(data) + (size - tempSize)),temp->Bits(),tempSize);
+				memcpy((void *)(addr_t(data) + (size - tempSize)),temp->Bits(),tempSize);
 				map.DetachBitmap(&temp);
 				delete temp;
 				construct = true;

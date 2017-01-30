@@ -22,10 +22,10 @@ BSound *getsound(long id) {
 	decodeformat((unsigned char *)(sound),&format,length,&is_old);
 	BSound *sounda;
 	if (is_old) {
-		sound = (void *)((int)sound + 20);
+		sound = (void *)(((addr_t))sound + 20);
 		sounda = new BSound((void *)sound,length - 20,format);
 	} else {
-		sound = (void *)((int)sound + sizeof(TranslatorSound));
+		sound = (void *)(((addr_t))sound + sizeof(TranslatorSound));
 		sounda = new BSound((void *)sound,length - 20,format);
 	}
 	return (sounda);
@@ -40,10 +40,10 @@ BSound *getsound(const char *name) {
 	decodeformat((unsigned char *)(sound),&format,length,&is_old);
 	BSound *sounda;
 	if (is_old) {
-		sound = (void *)((int)sound + 20);
+		sound = (void *)(((addr_t))sound + 20);
 		sounda = new BSound((void *)sound,length - 20,format);
 	} else {
-		sound = (void *)((int)sound + sizeof(TranslatorSound));
+		sound = (void *)(((addr_t))sound + sizeof(TranslatorSound));
 		sounda = new BSound((void *)sound,length - 20,format);
 	}
 	return (sounda);
