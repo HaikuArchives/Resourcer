@@ -5,7 +5,7 @@ bool openpan;
 
 class BRApplication : public BApplication {
 	public:
-	BRApplication(void) : BApplication("application/resourcer") {openpan = false;retrieve = new char[2];retrieve[0] = 0;}
+	BRApplication(void) : BApplication("application/x-vnd.NW-resourcer") {openpan = false;retrieve = new char[2];retrieve[0] = 0;}
 	void RefsReceived(BMessage *message);
 	void getready(BMessage *message,bool istempfile = false);
 	void dissectwindow(BMessage *msg);

@@ -99,7 +99,7 @@ status_t ResImageView::Archive(BMessage *archive, bool deep) const{
 		return stat;
 	archive->AddString("class", "ResImageView");
 	archive->AddInt32("resid",resid);
-	archive->AddString("add-on","application/resourcer-WIND");
+	archive->AddString("add-on","application/x-vnd.NW-resourcer-WIND");
 	return B_OK;
 }
 
